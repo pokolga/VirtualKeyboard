@@ -1,0 +1,386 @@
+/*
+em - от текущего шрифта
+% - от родительской ширины
+rem - от стиля html шрифта
+vw – 1% ширины окна
+vh – 1% высоты окна
+vmin – наименьшее из (vw, vh)
+vmax – наибольшее из (vw, vh)
+*/
+
+:root {
+    --color-yellow: #fce837; 
+    --color-green: #9cfd26;
+    --color-red:  rgb(255, 104, 87); 
+    --color-grey:#555;
+    --color-light-grey:#ccc;
+    --color-white: white;
+    --color-light-key: #82C6FA;
+    --color-bord-key: #2f485a;
+    --color-back-key:#476c88;
+    --color-hover-key:#3b5a71;
+    --trans: all 0.7s ease-in;
+}
+
+html{
+    font-size: 20px;
+}
+
+* { 
+    box-sizing: border-box;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+body {
+    margin: auto;
+    background-color: var(--color-bord-key);
+    color: var(--color-grey); 
+    font-family:  'Arial',  sans-serif;
+    font-style: normal;
+
+    user-select: none;
+}
+
+main {
+    text-align: center;
+}
+
+.field {
+    margin: 15px auto 10px auto;
+    padding: 2vh 0;
+    width: 75vw;
+    background-color: #eee;
+}
+
+.keyboard {
+    width: 75vw;
+    margin: 10px auto;
+    padding: 15px 0 8px 0;
+    background-color: var(--color-hover-key);
+    border: var(--color-bord-key) 1px solid;
+    outline:var(--color-bord-key) 1px solid ;
+    outline-offset: -8px;
+    border-radius: .5em;
+}
+
+.numbers,
+.top,
+.middle,
+.bottom {
+    margin-bottom: 1.5vh;
+}
+
+.button,
+.backspace,
+.enter  {
+    width: 4vw;
+    padding: 5px 2px;
+    background-color: var(--color-back-key); 
+    border: var(--color-bord-key) solid 1px; 
+    border-radius: 4px;
+    color: var(--color-white);
+    font-weight: normal; 
+    cursor: pointer;
+}
+
+.backspace {
+    display: inline-block;
+    min-width: 40px;
+    border-color: var(--color-red);
+    color: var(--color-red);
+}
+
+.enter {
+    width: 10vw;
+    color: var(--color-white);
+    background-color: var(--color-red);
+    border-color: var(--color-red);
+}
+
+.button:hover,
+.backspace:hover,
+.enter:hover {
+    color: var(--color-light-key);
+    border-color: var(--color-light-key);
+    background: var( --color-hover-key);
+}
+
+.button:active,
+.backspace:active,
+.enter:active {
+   color: var(--color-white);
+   background: var(--color-light-key);
+}
+
+.overlap {
+    background: var(--color-yellow);
+    color:var(--color-grey);
+}
+
+.complete-match{
+    background: var(--color-green);
+    color:var(--color-grey);
+}
+
+.inactive {
+    background-color: var(--color-back-key); 
+    border: var(--color-bord-key) solid 1px;
+    color: var(--color-back-key);
+}
+
+.footer {
+    height: 50px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    color: var(--color-white);
+    font-weight: bold;
+    font-size:  20px;
+    line-height: 40px;
+}
+
+.rs-school-icon {
+    height: 30px;
+    filter: opacity(50%);
+    cursor: pointer;
+    transition: var(--trans);
+}
+
+.rs-school-icon:hover {
+    filter: opacity(100%);
+    box-shadow: 0px 0px 5px 1px var(--color-light-key) ;
+}
+
+.overlay {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    overflow: auto;
+    text-align: center;
+    background: rgba(155,155,155,0.8);
+    transition: background 1s ease-in-out;
+}    
+
+.modalMessage{
+    position: relative;
+    width: 75vw;
+    height: 70vh;
+    top: 15vh;
+    left: 12.5vw;
+    padding:  20px;
+    
+    overflow: auto;
+    background-color: var(--color-bord-key);
+    border: var(--color-green) 3px solid;
+    outline:var(--color-green) 3px dashed ;
+    outline-offset: -10px;
+    border-radius: 6px;
+    text-align: left;
+    color:var(--color-white);
+    font-size: 20px;
+}
+
+.modalMessage>h2 {
+    margin: 30px auto;
+    color: var(--color-white);
+}
+
+.search {
+    width: 4vmin;
+    height: 4vmin;
+    font-size: 20px;
+}
+
+.volume-slash {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.finish {
+    width: 10em;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: var(--color-red);
+    outline: none;
+    color: var(--color-white);
+    font-weight: normal; 
+    cursor: pointer;
+}
+
+.onceMore {
+    width: 15vw;
+    position: absolute;
+    right: 12.5vw ;
+    top: 200px;
+    padding: 1vw;
+}
+
+.hidden {
+   visibility: hidden;
+}
+
+.all,
+.total {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    
+}
+
+.all h3 {
+    margin-bottom:15px;
+}
+
+.first {
+    margin-right:0;
+    padding-right:40px;
+    border-right: var(--color-white) 2px solid;
+}
+
+.first canvas {
+    margin-bottom: 5px;
+}
+
+.second {
+     margin-right:0;
+     padding-right:40px;
+     padding-left:40px;
+     border-right: var(--color-white) 2px solid;
+     border-left: var(--color-white) 2px solid;
+}
+
+.third {
+    padding-left:40px;
+    border-left: var(--color-white) 2px solid;
+    width: 30%;
+}
+
+.myWords {
+    height: 90%;
+    width: 90%;
+    margin-top: 5%;
+    overflow: auto;
+    text-align: center;
+    flex-shrink: 2;
+    
+}
+.myWords::-webkit-scrollbar {
+    width: 0;
+}
+
+.red {
+    color: var(--color-red);
+}
+
+.green {
+    color: var(--color-green);
+}
+
+@media (max-width: 1000px) {
+    .modalMessage{
+        width: 96vw;
+        left: 2vw;
+    }
+
+    .all {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .first {
+        padding-right: 0;
+        padding-bottom: 10px;
+        border-right: none;
+        border-bottom: var(--color-white) 2px solid;
+    }
+    
+    .second {
+        padding-right: 0;
+        padding-left: 0;
+        padding-bottom: 10px;
+        border-right: none;
+        border-left: none;
+        border-bottom: var(--color-white) 2px solid;
+    }
+    
+    .third {
+        padding-left:0;
+        border-left: none;
+        text-align: center;
+    }
+
+
+}
+@media (max-width: 768px) {
+
+    html {
+        font-size: 16px;
+    }
+
+    .keyboard {
+        width: 90vw;
+    }
+
+    .onceMore {
+        right: 5vw;
+        top: 12vh;
+    }
+
+    .button,
+    .backspace {
+        width: 5vw;
+    }
+
+ 
+}
+
+@media (max-width: 500px) {
+
+    html {
+        font-size: 14px;
+    }
+
+    .keyboard {
+        width: 100%;
+    }
+
+    .button {
+        width: 6.5vw;
+    }
+
+    .enter, .backspace {
+        width: 20vw;
+        margin-top: 5px;
+    }
+
+    .modalMessage{
+        width: 90vw;
+        font-size: smaller;
+    }
+ 
+
+}
+
+@media (min-width: 1920px) {
+    .keyboard {
+        width: 60vw;
+    }
+    .modalMessage {
+        width: 60vw;
+        height: 40vh;
+        left: 20vw;
+    }
+
+
+}
+textarea {
+    border: 2px var(--color-red) solid;
+}
