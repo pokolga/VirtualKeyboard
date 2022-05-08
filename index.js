@@ -30,54 +30,78 @@ const bottomRow = [
  * generateKeyboard() - генерирует клавиатуру
 *********************************/
 function init() {
+    generateSkeleton();
     generateKeyboard();
 
 }
 
-function generateKeyboard() {
+function generateSkeleton() {
     let output = `<div class="content">
-   <main>
-   <textarea class="field" rows="10" cols="60"></textarea>
-   <div class="keyboard">
-   </div>
-   </main>
-   <footer class="footer">
-            <div class="git">
-                <a href="https://github.com/pokolga">
-                    <img class="rs-school-icon" src="./assets/img/github.svg" alt="github">
-                </a>
-            </div>
-            <span>© 2022</span>
-            <div class="rsschool">
-                <a href="https://rs.school/js-stage0/">
-                    <img class="rs-school-icon" src="./assets/img/rs_school_js.svg" alt="rs_school_js">
-                </a>
-            </div>
-        </footer>
+    <main>
+    <textarea class="field" rows="10" cols="60"></textarea>
+    <div class="keyboard">
     </div>
-   `;
+    </main>
+    <footer class="footer">
+             <div class="git">
+                 <a href="https://github.com/pokolga">
+                     <img class="rs-school-icon" src="./assets/img/github.svg" alt="github">
+                 </a>
+             </div>
+             <span>© 2022</span>
+             <div class="rsschool">
+                 <a href="https://rs.school/js-stage0/">
+                     <img class="rs-school-icon" src="./assets/img/rs_school_js.svg" alt="rs_school_js">
+                 </a>
+             </div>
+         </footer>
+     </div>
+    `;
     document.querySelector("body").insertAdjacentHTML("afterbegin", output);
-    output = "<div class='numbers'>";
+}
+
+function generateKeyboard() {
+    let output = "<div class='numbers'>";
     numbers.forEach((elem) => {
         output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
     })
-    output += "</div><div class='top'>";
+    output += "<button   class='special'>BackSpace</button></div>";
+    output += "<div class='top'><button class='special'>Tab</button>";
     topRow.forEach((elem) => {
         output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
     })
-    output += "</div><div class='middle'>";
+    output += "<button  class='special'>DEL</button></div><div class='middle'><button class='special'>CapsLock</button>";
     middleRow.forEach((elem) => {
         output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
     })
-    output += "</div><div class='bottom'>";
+    output += "<button  class='special'>ENTER</button></div><div class='bottom'><button  class='special'>Shift</button>";
     bottomRow.forEach((elem) => {
         output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
     })
-    output += "</div>";
+    output += "<button  class='special'>Shift</button>";
+    output += '<button class="special arrow-up"><i class="fas fa-circle-arrow-up"></i> </button></div>';
+    output += "<div class='additional'><button  class='special'>Ctrl</button><button class='special'>Win</button><button  class='special'>Alt</button><button  class='special space'> </button><button  class='special'>Alt</button><button  class='special'>Ctrl</button>";
+    output += '<button class="special  arrow-left"><i class="fas fa-circle-arrow-left"></i> </button><button class="special  arrow-down"><i class="fas fa-circle-arrow-down"></i> </button><button class="special  arrow-right"><i class="fas fa-circle-arrow-right"></i> </button></div>';
     document.querySelector(".keyboard").insertAdjacentHTML("afterbegin", output);
 
-    window.addEventListener('keydown', (ev) => console.log(ev));
-    document.querySelector(".keyboard").addEventListener('mouseup', (ev) => console.log(ev));
+    window.addEventListener('keyup', (ev) => {
+
+        let targetSymb = ev.key;
+        const virtualKey = Array.from(document.querySelectorAll(".keyboard input")).filter((e) => e.value === targetSymb);
+        if (virtualKey[0]) {
+            virtualKey[0].classList.add("active-key");
+            setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
+        }
+        document.querySelector(".field").textContent = document.querySelector(".field").textContent + targetSymb;
+    });
+    document.querySelector(".keyboard").addEventListener('mouseup', (ev) => {
+        console.log(ev.target.textContent);
+        document.querySelector(".field").focus();
+        if (ev.target.value) {
+            document.querySelector(".field").textContent = document.querySelector(".field").textContent + ev.target.value;
+        }
+
+    });
 }
 
 function ifBackSpace(activeSymb) {
@@ -99,9 +123,9 @@ function ifBackSpace(activeSymb) {
 
 window.addEventListener("DOMContentLoaded", init);
 
-window.addEventListener('keydown', (ev) => {
+/*window.addEventListener('keydown', (ev) => {
     if (document.querySelector(".overlay")) return; //иначе многократно выводит модальные окна
-    if (!activeWord) return;
+
 
     let inpSymb = ev.key;
     //смотрим на особые клавиши: ввод, забой.
@@ -140,10 +164,7 @@ window.addEventListener('keydown', (ev) => {
         case "ё": inpSymb = "е"; //буква ё не используется
     }
 
-    if (!keyboardRu.includes(inpSymb.toLowerCase())) { return; } //отсекаем символы специальные, ALT SHIFT и т.п.
-
-
-})
+})*/
 
 /*document.querySelector(".keyboard").addEventListener('mouseup', (ev) => {
     if (!activeWord) return;
