@@ -82,7 +82,6 @@ function generateKeyboard(cap = false, shift = false, lang = document.querySelec
     document.querySelector(".keyboard").insertAdjacentHTML("afterbegin", output);
 
     if (cap) {
-        console.log(document.querySelector(".caps"))
         document.querySelector(".caps").classList.add("active-caps");
     }
 
@@ -123,7 +122,6 @@ function virtualKeyboardKeyDown(ev) {
     }
 
     if (ev.target.value) {
-        console.log(field.selectionStart, field.selectionEnd)
         field.setRangeText(ev.target.value, field.selectionStart, field.selectionEnd, "end");
     }
     field.focus();
@@ -132,7 +130,7 @@ function virtualKeyboardKeyDown(ev) {
 function specialAction(key) {
     let field = document.querySelector(".field");
     field.focus();
-    console.log(key.className);
+
     switch (key.textContent.trim().toUpperCase()) {
 
         case "TAB": {
@@ -188,21 +186,31 @@ function specialAction(key) {
     field.focus();
     //////////////////////////////////////////
     if (key.className.includes("arrow-up")) {
-        //field.value = field.value + "&amp;"
-
-        field.value = "\2193";
-
-        // ("\2193");
+        if (field.value.lastIndexOf("\n", field.selectionStart) === -1) {
+            field.selectionStart = 0;
+        } else {
+            field.selectionStart = field.value.lastIndexOf("\n", field.selectionStart);
+        }
+        field.selectionEnd = field.selectionStart;
     }
     if (key.className.includes("arrow-down")) {
-        // field.setRangeText("\2192");
+        if (field.value.indexOf("\n", field.selectionStart) === -1) {
+            field.selectionStart = field.value.length;
+        } else {
+            field.selectionStart = field.value.indexOf("\n", field.selectionStart) + 1;
+        }
+        field.selectionEnd = field.selectionStart;
     }
     if (key.className.includes("arrow-left")) {
-        // field.setRangeText("\2190");
+        field.selectionStart = field.selectionStart - 1;
+        field.selectionStart = (field.selectionStart < 0) ? 0 : field.selectionStart;
+        field.selectionEnd = field.selectionStart;
     }
     if (key.className.includes("arrow-right")) {
-        //  field.setRangeText("\2191");
+        field.selectionStart = (++field.selectionStart > field.value.length) ? field.value.length : field.selectionStart;
+        field.selectionEnd = field.selectionStart;
     }
+    field.focus();
 }
 
 function shiftKeyUp() {
@@ -233,7 +241,6 @@ window.addEventListener('keydown', (ev) => {
         setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
     }
     field.focus();
-    console.log(ev.code);
 
     switch (targetSymb.toUpperCase()) {
         case "CAPSLOCK": {
