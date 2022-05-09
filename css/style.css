@@ -55,6 +55,9 @@ main {
     outline:none;
 }
 
+.field:focus{
+    border-style: dashed;
+}
 .keyboard {
     width: 75vw;
     margin: 10px auto;
@@ -98,10 +101,6 @@ main {
     background-color: var(--color-bord-key);
     border-color: var(--color-back-key);
 }
-.special.fas{
-    height: 23px;
-    p
-}
 
 .space {
     height:35px;
@@ -121,6 +120,10 @@ main {
 .active-key {
    color: var(--color-white);
    background: var(--color-light-key);
+}
+
+.active-caps{
+    background-color: var(--color-green);
 }
 
 .footer {

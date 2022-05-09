@@ -15,19 +15,16 @@ const bottomRow = [
 ];
 
 
-//                                   <div class="backspace delete"><i class="fa-solid fa-delete-left"></i></div>
-//                                  <input type='button' class="enter" value="ВВОД">
-
-
-
-
-
-
-
 //functions
 /*********************************
  * init() - 
+ * generateSkeleton() - генерирует начальную структуру документа
  * generateKeyboard() - генерирует клавиатуру
+ * getSymb(elem, cap, shift, lang) - ищет символ в данных, который будет отображаться на клавише
+ *       elem - массив с данными для данной клавиши, cap - включен ли CapsLock, shift - нажата ли Shift, lang - какой язык
+ * virtualKeyboardKeyDown() - кликаем по виртуальным клавишам
+ * specialAction() - кликаем по спец.клавишам виртуальрной клавиатуры
+ * shiftKeyUp() - отпускаем клавишу Shift
 *********************************/
 function init() {
     generateSkeleton();
@@ -60,139 +57,221 @@ function generateSkeleton() {
     document.querySelector("body").insertAdjacentHTML("afterbegin", output);
 }
 
-function generateKeyboard() {
+function generateKeyboard(cap = false, shift = false, lang = "ru") {
     let output = "<div class='numbers'>";
-    numbers.forEach((elem) => {
-        output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
+    numbers.forEach(elem => {
+        //["2", "\"", "2", "@"]
+        output += `<input type='button' class='button' value='${getSymb(elem, cap, shift, lang)}'>`
     })
-    output += "<button   class='special'>BackSpace</button></div>";
-    output += "<div class='top'><button class='special'>Tab</button>";
+    output += "<button   class='special BS'>BackSpace</button></div>";
+    output += "<div class='top'><button class='special tab'>Tab</button>";
     topRow.forEach((elem) => {
-        output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
+        output += `<input type='button' class='button' value='${getSymb(elem, cap, shift, lang)}'>`
     })
-    output += "<button  class='special'>DEL</button></div><div class='middle'><button class='special'>CapsLock</button>";
+    output += `<button  class='special del'>DEL</button></div><div class='middle'><button class='special caps' data-on=${cap}>CapsLock</button>`;
     middleRow.forEach((elem) => {
-        output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
+        output += `<input type='button' class='button' value='${getSymb(elem, cap, shift, lang)}'>`
     })
-    output += "<button  class='special'>ENTER</button></div><div class='bottom'><button  class='special'>Shift</button>";
+    output += "<button  class='special enter'>ENTER</button></div><div class='bottom'><button  class='special shift'>Shift</button>";
     bottomRow.forEach((elem) => {
-        output += `<input type='button' class='button' value='${elem[0].toLowerCase()}'>`
+        output += `<input type='button' class='button' value='${getSymb(elem, cap, shift, lang)}'>`
     })
-    output += "<button  class='special'>Shift</button>";
+    output += "<button  class='special shift'>Shift</button>";
     output += '<button class="special arrow-up"><i class="fas fa-circle-arrow-up"></i> </button></div>';
-    output += "<div class='additional'><button  class='special'>Ctrl</button><button class='special'>Win</button><button  class='special'>Alt</button><button  class='special space'> </button><button  class='special'>Alt</button><button  class='special'>Ctrl</button>";
+    output += "<div class='additional'><button  class='special ctrl'>Ctrl</button><button class='special win'>Win</button><button  class='special alt'>Alt</button><button  class='special space'> </button><button  class='special alt'>Alt</button><button  class='special ctrl'>Ctrl</button>";
     output += '<button class="special  arrow-left"><i class="fas fa-circle-arrow-left"></i> </button><button class="special  arrow-down"><i class="fas fa-circle-arrow-down"></i> </button><button class="special  arrow-right"><i class="fas fa-circle-arrow-right"></i> </button></div>';
     document.querySelector(".keyboard").insertAdjacentHTML("afterbegin", output);
 
-    window.addEventListener('keyup', (ev) => {
+    if (cap) {
+        console.log(document.querySelector(".caps"))
+        document.querySelector(".caps").classList.add("active-caps");
+    }
 
-        let targetSymb = ev.key;
-        const virtualKey = Array.from(document.querySelectorAll(".keyboard input")).filter((e) => e.value === targetSymb);
-        if (virtualKey[0]) {
-            virtualKey[0].classList.add("active-key");
-            setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
-        }
-        document.querySelector(".field").textContent = document.querySelector(".field").textContent + targetSymb;
-    });
-    document.querySelector(".keyboard").addEventListener('mouseup', (ev) => {
-        console.log(ev.target.textContent);
-        document.querySelector(".field").focus();
-        if (ev.target.value) {
-            document.querySelector(".field").textContent = document.querySelector(".field").textContent + ev.target.value;
-        }
 
-    });
+    document.querySelector(".keyboard").addEventListener('mousedown', virtualKeyboardKeyDown);
+    document.querySelectorAll(".shift").forEach(item => item.addEventListener('mouseup', shiftKeyUp));
 }
 
-function ifBackSpace(activeSymb) {
-    if (!activeSymb) {
-        activeSymb = activeWord.querySelectorAll("div")[4];
+function getSymb(elem, cap, shift, lang) {
+    let symb;
+    if (elem.length === 4) {
+        if (lang === "ru") {
+            symb = (shift) ? elem[1] : elem[0];
+        } else {
+            symb = (shift) ? elem[3] : elem[2];
+        }
     } else {
-        activeSymb = activeSymb.previousElementSibling;
-        if (!activeSymb) {
-            activeSymb = activeWord.querySelector("div");
+        if (lang === "ru") {
+            symb = (shift) ? elem[0].toUpperCase() : elem[0].toLowerCase();
+        } else {
+            symb = (shift) ? elem[1].toUpperCase() : elem[1].toLowerCase();
         }
     }
-    activeSymb.textContent = "";
-    document.querySelector(".enter").classList.add("inactive");
-    return activeSymb;
+    if (shift) {
+        symb = (cap) ? symb.toLowerCase() : symb.toUpperCase();
+    } else {
+        symb = (cap) ? symb.toUpperCase() : symb.toLowerCase();
+    }
+    return symb;
 }
 
+function virtualKeyboardKeyDown(ev) {
+    const field = document.querySelector(".field");
+    field.focus();
+    if (ev.target.classList.contains("special") || ev.target.parentElement.classList.contains("special")) {
+        specialAction(ev.target);
+        return;
+    }
+
+    if (ev.target.value) {
+        console.log(field.selectionStart, field.selectionEnd)
+        field.setRangeText(ev.target.value, field.selectionStart, field.selectionEnd, "end");
+    }
+    field.focus();
+}
+
+function specialAction(key) {
+    let field = document.querySelector(".field");
+    field.focus();
+
+    switch (key.textContent.trim().toUpperCase()) {
+
+        case "TAB": {
+            field.setRangeText("\t");
+            break;
+        }
+        case "ENTER": {
+            field.setRangeText("\n");
+            break;
+        }
+        case "": {
+            console.log(field.selectionStart, field.selectionEnd);
+            field.setRangeText(" ");
+            break;
+        }
+        case "CAPSLOCK": {
+            if (key.dataset.on === 'false') {
+                document.querySelector(".keyboard").innerHTML = "";
+                generateKeyboard(true, false);
+            }
+            else {
+                document.querySelector(".keyboard").innerHTML = "";
+                generateKeyboard(false, false);
+            }
+            break;
+        }
+        case "SHIFT": {
+            let cap = document.querySelector(".caps").dataset.on !== "false";
+            document.querySelector(".keyboard").innerHTML = "";
+            generateKeyboard(cap, true);
+            break;
+        }
+        case "DEL": {
+            console.log(field.selectionStart);
+            if (field.selectionStart === field.selectionEnd) {
+                field.setSelectionRange(field.selectionStart, ++field.selectionStart);
+            }
+            field.setRangeText("");
+            console.log(field.selectionStart);
+            break;
+        }
+        case "BACKSPACE": {
+            if (field.selectionStart === field.selectionEnd) {
+                console.log(field.selectionStart, field.selectionEnd);
+
+                field.setSelectionRange(--field.selectionStart, field.selectionEnd);
+            }
+            field.setRangeText("");
+            console.log(field.selectionStart, field.selectionEnd);
+        }
+    }
+    field = document.querySelector(".field");
+    field.focus();
+}
+
+function shiftKeyUp() {
+    let cap = document.querySelector(".caps").dataset.on !== "false";
+    document.querySelector(".keyboard").innerHTML = "";
+    generateKeyboard(cap, false);
+}
 
 //listeners
 
 window.addEventListener("DOMContentLoaded", init);
 
-/*window.addEventListener('keydown', (ev) => {
-    if (document.querySelector(".overlay")) return; //иначе многократно выводит модальные окна
-
-
-    let inpSymb = ev.key;
-    //смотрим на особые клавиши: ввод, забой.
-    switch (inpSymb) {
-        case " ":
-            ev.preventDefault();
-            return;
-        case "Backspace":
-            activeSymb = ifBackSpace(activeSymb);
-            return;
-        case "Enter":
-            let result = checkWord(activeWord); //посчитать буквы!
-
-            if (!result) return; //не все буквы введены или отсутствует слово в словаре
-
-            //определяем цвета угаданных букв
-            changeColorOfRightSymb(activeWord, result);
-
-            if (result === "!!!!!") {
-                showResult(activeWord, "victory");
-                activeWord = null;
-                return;
-            }
-
-            numbOfAttemp++;
-            if (numbOfAttemp >= 6) {
-                showResult(activeWord, "loss");
-                activeWord = null;
-                return;
-            }
-            activeWord = document.querySelector(`.${attempts[numbOfAttemp]}`);
-            activeSymb = activeWord.querySelector("div");
-            activeWordHighlight(activeWord);
-            document.querySelector(".enter").classList.add("inactive");
-            return;
-        case "ё": inpSymb = "е"; //буква ё не используется
+window.addEventListener('keydown', (ev) => {
+    let field = document.querySelector(".field");
+    let targetSymb = ev.key;
+    const virtualKey = Array.from(document.querySelectorAll(".keyboard input")).filter((e) => e.value === targetSymb);
+    if (virtualKey[0]) {
+        virtualKey[0].classList.add("active-key");
+        setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
     }
-
-})*/
-
-/*document.querySelector(".keyboard").addEventListener('mouseup', (ev) => {
-    if (!activeWord) return;
-
-    if (!(ev.target.type === "button" || /delete/.test(ev.target.className))) return;
-
-    let inpSymb = ev.target.value;
-
-    if (/delete/.test(ev.target.className)) {
-        //написать новое
-        return;
+    field.focus();
+	console.log(targetSymb);
+	
+    switch (targetSymb.toUpperCase()) {
+        case "CAPSLOCK": {
+            if (document.querySelector(".caps").dataset.on === 'false') {
+                document.querySelector(".keyboard").innerHTML = "";
+                generateKeyboard(true, false);
+            }
+            else {
+                document.querySelector(".keyboard").innerHTML = "";
+                generateKeyboard(false, false);
+            }
+            break;
+        }
+        case "SHIFT": {
+            let cap = document.querySelector(".caps").dataset.on !== "false";
+            document.querySelector(".keyboard").innerHTML = "";
+            generateKeyboard(cap, true);
+            document.querySelector(".shift").classList.add("active-key");
+            break;
+        }
+        case "DELETE": {
+            document.querySelector(".del").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".del").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "BACKSPACE": {
+            document.querySelector(".BS").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".BS").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "TAB": {
+            document.querySelector(".tab").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".tab").classList.remove("active-key"); }, 150);
+            break;
+        }
+		case "CONTROL": {
+            document.querySelector(".ctrl").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".ctrl").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "ENTER": {
+            document.querySelector(".enter").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".enter").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case " ": {
+            document.querySelector(".space").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".space").classList.remove("active-key"); }, 150);
+            break;
+        }
     }
+    //field.value = document.querySelector(".field").textContent + targetSymb;
+});
 
-    activeSymb.textContent = inpSymb; //записываем в ячейку и переходим к следующей
-    activeSymb = activeSymb.nextElementSibling;
-    if (!activeSymb) document.querySelector(".enter").classList.remove("inactive");
+window.addEventListener('keyup', (ev) => {
+    let field = document.querySelector(".field");
+
+    if (ev.key.toUpperCase() !== "SHIFT") return;
+
+    let cap = document.querySelector(".caps").dataset.on !== "false";
+    document.querySelector(".keyboard").innerHTML = "";
+    generateKeyboard(cap, false);
+    document.querySelector(".shift").classList.remove("active-key");
 })
 
-document.querySelector(".sound").addEventListener("click", soundControl);
-
-*/
-
-console.log(`Итого: 60(70)
-                                        +10 Вёрстка:реализован интерфейс игры, в футере приложения есть ссылка на гитхаб автора приложения, год создания приложения, логотип курса со ссылкой на курс
-                                        +10 Логика игры. Ходы, другие действия игрока подчиняются определённым свойственным игре правилам
-                                        +10 Реализовано завершение игры при достижении игровой цели
-                                        +10 По окончанию игры выводится её результат:  выигрыш или поражение, ссылка на значение слова, кнопка на новую итерацию игры
-                                        +10 Результаты (угаданные слова) сохраняются в local storage. Есть диаграмма, с какой попытки угадано слово, общая статистика игр и перечень сыгранных слов
-                                        +10 Анимации или звуки: звуки, отражающие меру попадания в цель, поддерживающие вывод результата, музыкальная заставка в начале игры
-                                        +10 Очень высокое качество оформления приложения и/или дополнительный не предусмотренный в задании функционал: заставка с выводом произвольных слов из словаря, серьезная работа с подготовкой словаря существительных из 5 букв.
-                                        `);
+console.log(`Итого: 60(70)  `)
