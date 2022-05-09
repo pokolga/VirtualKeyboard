@@ -46,10 +46,8 @@ function generateSkeleton() {
                  </a>
              </div>
              <span>© 2022</span>
-             <div class="rsschool">
-                 <a href="https://rs.school/js-stage0/">
-                     <img class="rs-school-icon" src="./assets/img/rs_school_js.svg" alt="rs_school_js">
-                 </a>
+             <div >
+             ОС: Windows, переключение языка: левые Ctrl+Alt
              </div>
          </footer>
      </div>
@@ -134,20 +132,25 @@ function virtualKeyboardKeyDown(ev) {
 function specialAction(key) {
     let field = document.querySelector(".field");
     field.focus();
-
+    console.log(key.className);
     switch (key.textContent.trim().toUpperCase()) {
 
         case "TAB": {
             field.setRangeText("\t");
+            field.selectionStart++;
+            field.selectionEnd++;
             break;
         }
         case "ENTER": {
             field.setRangeText("\n");
+            field.selectionStart++;
+            field.selectionEnd++;
             break;
         }
         case "": {
-            console.log(field.selectionStart, field.selectionEnd);
             field.setRangeText(" ");
+            field.selectionStart++;
+            field.selectionEnd++;
             break;
         }
         case "CAPSLOCK": {
@@ -168,26 +171,38 @@ function specialAction(key) {
             break;
         }
         case "DEL": {
-            console.log(field.selectionStart);
             if (field.selectionStart === field.selectionEnd) {
                 field.setSelectionRange(field.selectionStart, ++field.selectionStart);
             }
             field.setRangeText("");
-            console.log(field.selectionStart);
             break;
         }
         case "BACKSPACE": {
             if (field.selectionStart === field.selectionEnd) {
-                console.log(field.selectionStart, field.selectionEnd);
-
                 field.setSelectionRange(--field.selectionStart, field.selectionEnd);
             }
             field.setRangeText("");
-            console.log(field.selectionStart, field.selectionEnd);
         }
     }
     field = document.querySelector(".field");
     field.focus();
+    //////////////////////////////////////////
+    if (key.className.includes("arrow-up")) {
+        //field.value = field.value + "&amp;"
+
+        field.value = "\2193";
+
+        // ("\2193");
+    }
+    if (key.className.includes("arrow-down")) {
+        // field.setRangeText("\2192");
+    }
+    if (key.className.includes("arrow-left")) {
+        // field.setRangeText("\2190");
+    }
+    if (key.className.includes("arrow-right")) {
+        //  field.setRangeText("\2191");
+    }
 }
 
 function shiftKeyUp() {
@@ -202,7 +217,6 @@ function changeLanguage() {
     document.querySelector(".keyboard").innerHTML = "";
     generateKeyboard(cap, false, (lang) ? "ru" : "en");
     document.querySelector(".keyboard").dataset.lang = (lang) ? "ru" : "en";
-    //запомнить язык
     localStorage.setItem('lang', (lang) ? "ru" : "en");
 }
 
@@ -219,7 +233,7 @@ window.addEventListener('keydown', (ev) => {
         setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
     }
     field.focus();
-    console.log(targetSymb);
+    console.log(ev.code);
 
     switch (targetSymb.toUpperCase()) {
         case "CAPSLOCK": {
@@ -237,7 +251,11 @@ window.addEventListener('keydown', (ev) => {
             let cap = document.querySelector(".caps").dataset.on !== "false";
             document.querySelector(".keyboard").innerHTML = "";
             generateKeyboard(cap, true);
-            document.querySelector(".shift").classList.add("active-key");
+            if (ev.code === "ShiftLeft") {
+                document.querySelector(".shift").classList.add("active-key");
+            } else {
+                document.querySelectorAll(".shift")[1].classList.add("active-key");
+            }
             break;
         }
         case "DELETE": {
@@ -255,10 +273,29 @@ window.addEventListener('keydown', (ev) => {
             setTimeout(function () { document.querySelector(".tab").classList.remove("active-key"); }, 150);
             break;
         }
+        case "META": {
+            ev.preventDefault();
+            document.querySelector(".win").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".win").classList.remove("active-key"); }, 150);
+            break;
+        }
         case "CONTROL": {
-            //  console.log(ev);
-            document.querySelector(".ctrl").classList.add("active-key");
-            setTimeout(function () { document.querySelector(".ctrl").classList.remove("active-key"); }, 150);
+            if (ev.code === "ControlLeft") {
+                document.querySelector(".ctrl").classList.add("active-key");
+            } else {
+                document.querySelectorAll(".ctrl")[1].classList.add("active-key");
+            }
+            setTimeout(function () { document.querySelectorAll(".ctrl").forEach((elem) => elem.classList.remove("active-key")) }, 150);
+            break;
+        }
+        case "ALT": {
+            ev.preventDefault();
+            if (ev.code === "AltLeft") {
+                document.querySelector(".alt").classList.add("active-key");
+            } else {
+                document.querySelectorAll(".alt")[1].classList.add("active-key");
+            }
+            setTimeout(function () { document.querySelectorAll(".alt").forEach((elem) => elem.classList.remove("active-key")) }, 150);
             break;
         }
         case "ENTER": {
@@ -272,7 +309,31 @@ window.addEventListener('keydown', (ev) => {
             break;
         }
     }
-    //field.value = document.querySelector(".field").textContent + targetSymb;
+
+    switch (ev.code) {
+        case "ArrowUp": {
+            document.querySelector(".arrow-up").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".arrow-up").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "ArrowDown": {
+            document.querySelector(".arrow-down").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".arrow-down").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "ArrowLeft": {
+            document.querySelector(".arrow-left").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".arrow-left").classList.remove("active-key"); }, 150);
+            break;
+        }
+        case "ArrowRight": {
+            document.querySelector(".arrow-right").classList.add("active-key");
+            setTimeout(function () { document.querySelector(".arrow-right").classList.remove("active-key"); }, 150);
+            break;
+        }
+    }
+
+
     if ((ev.code === "ControlLeft" && ev.altKey) || (ev.code === "AltLeft" && ev.ctrlKey)) {
         changeLanguage();
     }
