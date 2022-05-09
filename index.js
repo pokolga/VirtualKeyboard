@@ -2,13 +2,13 @@
 //data
 
 const numbers = [
-    ["Ё", "Ё", "`", "~"], ["1", "!", "1", "!"], ["2", "\"", "2", "@"], ["3", "№", "3", "#"], ["4", ";", "4", "$"], ["5", "%", "5", "$"], ["6", ":", "6", "^"], ["7", "?", "7", "&"], ["8", "*", "8", "*"], ["9", "(", "9", "("], ["0", ")", "0", ")"], ["-", "_", "-", "_"], ["=", "+", "=", "+"]
+    ["Ё", "Ё", "`", "~"], ["1", "!", "1", "!"], ["2", "\"", "2", "@"], ["3", "№", "3", "#"], ["4", ";", "4", "$"], ["5", "%", "5", "%"], ["6", ":", "6", "^"], ["7", "?", "7", "&"], ["8", "*", "8", "*"], ["9", "(", "9", "("], ["0", ")", "0", ")"], ["-", "_", "-", "_"], ["=", "+", "=", "+"]
 ];
 const topRow = [
     ["Й", "Q"], ["Ц", "W"], ["У", "E"], ["К", "R"], ["Е", "T"], ["Н", "Y"], ["Г", "U"], ["Ш", "I"], ["Щ", "O"], ["З", "P"], ["Х", "Х", "[", "{"], ["Ъ", "Ъ", "]", "}"]
 ];
 const middleRow = [
-    ["Ф", "A"], ["Ы", "S"], ["В", "D"], ["А", "F"], ["П", "G"], ["Р", "H"], ["О", "J"], ["Л", "K"], ["Д", "L"], ["Ж", "Ж", ";", ":"], ["Э", "Э", "'", "\""], ["\\", "/", "\\", "|"]
+    ["Ф", "A"], ["Ы", "S"], ["В", "D"], ["А", "F"], ["П", "G"], ["Р", "H"], ["О", "J"], ["Л", "K"], ["Д", "L"], ["Ж", "Ж", ";", ":"], ["Э", "Э", "&prime;", '"'], ["\\", "/", "\\", "|"]
 ];
 const bottomRow = [
     ["Я", "Z"], ["Ч", "X"], ["С", "C"], ["М", "V"], ["И", "B"], ["Т", "N"], ["Ь", "M"], ["Б", "Б", ",", "<"], ["Ю", "Ю", ".", ">"], [".", ",", "/", "?"]
@@ -28,7 +28,7 @@ const bottomRow = [
 *********************************/
 function init() {
     generateSkeleton();
-    generateKeyboard();
+    generateKeyboard(false, false, localStorage.getItem('lang') || 'en');
 
 }
 
@@ -36,7 +36,7 @@ function generateSkeleton() {
     let output = `<div class="content">
     <main>
     <textarea class="field" rows="10" cols="60"></textarea>
-    <div class="keyboard">
+    <div class="keyboard" data-lang="${localStorage.getItem('lang') || 'en'}">
     </div>
     </main>
     <footer class="footer">
@@ -57,7 +57,7 @@ function generateSkeleton() {
     document.querySelector("body").insertAdjacentHTML("afterbegin", output);
 }
 
-function generateKeyboard(cap = false, shift = false, lang = "ru") {
+function generateKeyboard(cap = false, shift = false, lang = document.querySelector(".keyboard").dataset.lang) {
     let output = "<div class='numbers'>";
     numbers.forEach(elem => {
         //["2", "\"", "2", "@"]
@@ -78,8 +78,9 @@ function generateKeyboard(cap = false, shift = false, lang = "ru") {
     })
     output += "<button  class='special shift'>Shift</button>";
     output += '<button class="special arrow-up"><i class="fas fa-circle-arrow-up"></i> </button></div>';
-    output += "<div class='additional'><button  class='special ctrl'>Ctrl</button><button class='special win'>Win</button><button  class='special alt'>Alt</button><button  class='special space'> </button><button  class='special alt'>Alt</button><button  class='special ctrl'>Ctrl</button>";
+    output += "<div class='additional'><button  class='special ctrl'>Ctrl</button><button class='special win'>Win</button><button  class='special alt'>Alt</button><button  class='special space'>&nbsp;</button><button  class='special alt'>Alt</button><button  class='special ctrl'>Ctrl</button>";
     output += '<button class="special  arrow-left"><i class="fas fa-circle-arrow-left"></i> </button><button class="special  arrow-down"><i class="fas fa-circle-arrow-down"></i> </button><button class="special  arrow-right"><i class="fas fa-circle-arrow-right"></i> </button></div>';
+    output = output.replace("&PRIME;", "&prime;");
     document.querySelector(".keyboard").insertAdjacentHTML("afterbegin", output);
 
     if (cap) {
@@ -195,6 +196,16 @@ function shiftKeyUp() {
     generateKeyboard(cap, false);
 }
 
+function changeLanguage() {
+    let cap = document.querySelector(".caps").dataset.on !== "false";
+    let lang = document.querySelector(".keyboard").dataset.lang === "en";
+    document.querySelector(".keyboard").innerHTML = "";
+    generateKeyboard(cap, false, (lang) ? "ru" : "en");
+    document.querySelector(".keyboard").dataset.lang = (lang) ? "ru" : "en";
+    //запомнить язык
+    localStorage.setItem('lang', (lang) ? "ru" : "en");
+}
+
 //listeners
 
 window.addEventListener("DOMContentLoaded", init);
@@ -208,8 +219,8 @@ window.addEventListener('keydown', (ev) => {
         setTimeout(function () { virtualKey[0].classList.remove("active-key"); }, 150);
     }
     field.focus();
-	console.log(targetSymb);
-	
+    console.log(targetSymb);
+
     switch (targetSymb.toUpperCase()) {
         case "CAPSLOCK": {
             if (document.querySelector(".caps").dataset.on === 'false') {
@@ -244,7 +255,8 @@ window.addEventListener('keydown', (ev) => {
             setTimeout(function () { document.querySelector(".tab").classList.remove("active-key"); }, 150);
             break;
         }
-		case "CONTROL": {
+        case "CONTROL": {
+            //  console.log(ev);
             document.querySelector(".ctrl").classList.add("active-key");
             setTimeout(function () { document.querySelector(".ctrl").classList.remove("active-key"); }, 150);
             break;
@@ -261,10 +273,12 @@ window.addEventListener('keydown', (ev) => {
         }
     }
     //field.value = document.querySelector(".field").textContent + targetSymb;
+    if ((ev.code === "ControlLeft" && ev.altKey) || (ev.code === "AltLeft" && ev.ctrlKey)) {
+        changeLanguage();
+    }
 });
 
 window.addEventListener('keyup', (ev) => {
-    let field = document.querySelector(".field");
 
     if (ev.key.toUpperCase() !== "SHIFT") return;
 
@@ -272,6 +286,6 @@ window.addEventListener('keyup', (ev) => {
     document.querySelector(".keyboard").innerHTML = "";
     generateKeyboard(cap, false);
     document.querySelector(".shift").classList.remove("active-key");
+
 })
 
-console.log(`Итого: 60(70)  `)
